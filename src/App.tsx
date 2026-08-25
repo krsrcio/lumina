@@ -31,6 +31,7 @@ function App() {
   const chunksRef = useRef<Blob[]>([])
   const recordAnimationRef = useRef<number | null>(null)
   const recordStreamRef = useRef<MediaStream | null>(null)
+  const initialCameraRequestRef = useRef(false)
   const [page, setPage] = useState<Page>('camera')
   const [mode, setMode] = useState<Mode>('PHOTO')
   const [collapsed, setCollapsed] = useState(false)
@@ -118,6 +119,12 @@ function App() {
       // resume automatically when that happens.
     })
   }, [cameraState])
+
+  useEffect(() => {
+    if (initialCameraRequestRef.current) return
+    initialCameraRequestRef.current = true
+    void startCamera()
+  }, [startCamera])
 
   useEffect(() => {
     if (!recording || recordPaused) return
@@ -450,7 +457,8 @@ function CameraPage(props: {
 function PermissionScreen({ state, startCamera }: { state: string; startCamera: () => void }) {
   const missing = state === 'missing'
   const blocked = state === 'blocked'
-  return <div className="permission-screen"><div className="permission-icon"><CameraIcon size={30} /></div><h2>{missing ? 'No camera detected' : blocked ? 'Camera permission blocked' : 'Camera access is required'}</h2><p>{missing ? 'Connect a camera or check your browser permissions.' : blocked ? 'Allow camera access in your browser settings to continue.' : 'Your camera feed stays on this device.'}</p>{!missing && <button type="button" className="primary-button" onClick={startCamera}>{blocked ? 'Open Camera Settings' : 'Enable Camera'}<ChevronRight size={17} /></button>}<button type="button" className="text-button">Choose Camera Device</button></div>
+  const [showSteps, setShowSteps] = useState(false)
+  return <div className="permission-screen"><div className="permission-icon"><CameraIcon size={30} /></div><h2>{missing ? 'No camera detected' : blocked ? 'Camera permission blocked' : 'Camera access is required'}</h2><p>{missing ? 'Connect a camera or check your browser permissions.' : blocked ? 'Allow camera access from your browser’s address bar, then try again.' : 'Your camera feed stays on this device.'}</p>{blocked && showSteps && <ol className="permission-steps"><li>Click the camera or lock icon beside the address bar.</li><li>Set <strong>Camera</strong> to <strong>Allow</strong> for this site.</li><li>Return here and select <strong>Try camera again</strong>.</li></ol>}{!missing && <button type="button" className="primary-button" onClick={startCamera}>{blocked ? 'Try camera again' : 'Enable Camera'}<ChevronRight size={17} /></button>}{blocked && <button type="button" className="text-button" onClick={() => setShowSteps(value => !value)}>{showSteps ? 'Hide permission steps' : 'Show permission steps'}</button>}{!blocked && <button type="button" className="text-button">Choose Camera Device</button>}</div>
 }
 
 function SettingsPanel({ devices, deviceId, setCamera, mirror, setMirror, saveMirrored, setSaveMirrored, grid, setGrid, brightness, setBrightness, contrast, setContrast, saturation, setSaturation, effect, setEffect, onClose, onReset }: {
