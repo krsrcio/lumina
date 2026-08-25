@@ -6,6 +6,7 @@ import {
   Settings2, SlidersHorizontal, Sparkles, SwitchCamera, TimerReset, Trash2, Video, X,
   Camera as CameraIcon, GripHorizontal, PanelsTopLeft, ShieldCheck, SunMedium, Volume2, Zap, WandSparkles,
 } from 'lucide-react'
+import { Analytics } from "@vercel/analytics/next"
 
 type Page = 'camera' | 'gallery' | 'settings'
 type Mode = 'PHOTO' | 'VIDEO' | 'BOOTH'
